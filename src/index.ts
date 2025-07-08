@@ -6,6 +6,14 @@ import { authRoute } from './routes/auth.route'
 
 dotenv.config()
 
+//logger func
+const logger = () =>
+  new Elysia().onBeforeHandle(({ request }) => {
+    const now = new Date().toISOString()
+    console.log(`[${now}] ${request.method} ${request.url}`)
+  })
+
+
 const app = new Elysia()
 
 app.use(
@@ -17,6 +25,7 @@ app.use(
 
 // mount routes
 app.use(authRoute)
+app.use(logger())
 
 app.listen(7878)
 console.log('Server running on http://localhost:7878')
