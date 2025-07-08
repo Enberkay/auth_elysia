@@ -1,7 +1,22 @@
-import { Elysia } from "elysia";
+import { Elysia } from 'elysia'
+import jwt from '@elysiajs/jwt'
+import dotenv from 'dotenv'
 
-const app = new Elysia().get("/", () => "Hello Elysia").listen(3000);
+import { authRoute } from './routes/auth.route'
 
-console.log(
-  `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
-);
+dotenv.config()
+
+const app = new Elysia()
+
+app.use(
+  jwt({
+    secret: process.env.JWT_SECRET!,
+    name: 'jwt',
+  })
+)
+
+// mount routes
+app.use(authRoute)
+
+app.listen(7878)
+console.log('Server running on http://localhost:7878')
