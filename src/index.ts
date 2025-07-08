@@ -3,6 +3,7 @@ import jwt from '@elysiajs/jwt'
 import dotenv from 'dotenv'
 
 import { authRoute } from './routes/auth.route'
+import { bookRoute } from './routes/book.route'
 
 dotenv.config()
 
@@ -25,6 +26,7 @@ app.use(
 
 // mount routes
 app.use(authRoute)
+app.use(bookRoute)
 app.use(logger())
 
 app.listen(7878)

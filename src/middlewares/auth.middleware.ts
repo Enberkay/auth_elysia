@@ -2,7 +2,7 @@ import { Context as ElysiaContext } from 'elysia'
 
 // ขยาย Context เพื่อรองรับ jwt และ store.user
 interface JwtContext extends ElysiaContext {
-  jwt: {
+  jwt?: {
     verify: (token: string) => Promise<any>
   }
   store: {
@@ -11,8 +11,8 @@ interface JwtContext extends ElysiaContext {
   }
 }
 
-export function authMiddleware(jwtSecret: string) {
-  return async (context: JwtContext, next: () => Promise<void>, ...args: any[]) => {
+export function authMiddleware() {
+  return async (context: JwtContext) => {
     try {
       const authHeader = context.headers.authorization
       const token = authHeader?.startsWith('Bearer ')
@@ -32,7 +32,6 @@ export function authMiddleware(jwtSecret: string) {
         return { error: 'Invalid token' }
       }
       context.store.user = payload
-      await next()
     } catch {
       context.set.status = 401
       return { error: 'Unauthorized' }
@@ -41,12 +40,11 @@ export function authMiddleware(jwtSecret: string) {
 }
 
 export function roleMiddleware(role: string) {
-  return async (context: JwtContext, next: () => Promise<void>, ...args: any[]) => {
+  return async (context: JwtContext) => {
     const user = context.store.user
     if (!user || user.role !== role) {
       context.set.status = 403
       return { error: 'Forbidden' }
     }
-    await next()
   }
 }
