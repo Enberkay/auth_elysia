@@ -1,4 +1,5 @@
 import { Context as ElysiaContext } from 'elysia'
+import { currentUser } from '../services/user.service'
 
 // ขยาย Context เพื่อรองรับ jwt และ store.user
 interface JwtContext extends ElysiaContext {
@@ -39,12 +40,25 @@ export function authMiddleware() {
   }
 }
 
-export function roleMiddleware(role: string) {
-  return async (context: JwtContext) => {
-    const user = context.store.user
-    if (!user || user.role !== role) {
-      context.set.status = 403
-      return { error: 'Forbidden' }
+export function roleMiddleware(requiredRole: string) {
+  return async (context: any) => {
+    const jwtUser = context.store.user
+    if (!jwtUser) {
+      context.set.status = 401
+      return { error: 'Unauthorized' }
     }
+
+    const dbUser = await currentUser(jwtUser.id)
+    if (!dbUser) {
+      context.set.status = 404
+      return { error: 'User not found' }
+    }
+
+    if (dbUser.role !== requiredRole) {
+      context.set.status = 403
+      return { error: 'Forbidden: Insufficient role' }
+    }
+
+    context.store.user = dbUser
   }
 }
