@@ -1,5 +1,6 @@
 import { Elysia } from 'elysia'
 import { register, login } from '../controllers/auth.controller'
+import { authMiddleware, roleMiddleware } from '../middlewares/auth.middleware'
 
 interface AuthBody {
   email: string
@@ -70,45 +71,14 @@ export const authRoute = new Elysia()
     }
   })
   // Protected routes
-  .derive(async (context) => {
-    const authHeader = context.headers.authorization
-    const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined
-    
-    if (!token) {
-      context.set.status = 401
-      return { user: null }
-    }
-    
-    // ใช้ any type เพื่อเข้าถึง jwt
-    const jwtContext = context as any
-    if (!jwtContext.jwt) {
-      context.set.status = 500
-      return { user: null }
-    }
-    
-    try {
-      const payload = await jwtContext.jwt.verify(token)
-      return { user: payload }
-    } catch {
-      context.set.status = 401
-      return { user: null }
-    }
-  })
-  .get('/me', ({ user, set }) => {
-    if (!user) {
+  .derive(authMiddleware())
+  .get('/me', ({ store, set }: { store: any, set: any }) => {
+    if (!store.user) {
       set.status = 401
       return { error: 'Unauthorized' }
     }
-    return { user }
+    return { user: store.user }
   })
-  .get('/admin', ({ user, set }) => {
-    if (!user) {
-      set.status = 401
-      return { error: 'Unauthorized' }
-    }
-    if (user.role !== 'admin') {
-      set.status = 403
-      return { error: 'Forbidden' }
-    }
-    return { message: 'Welcome admin!' }
+  .get('/admin', roleMiddleware('admin'), ({ store }: { store: any }) => {
+    return { message: 'Welcome admin!', user: store.user }
   })
