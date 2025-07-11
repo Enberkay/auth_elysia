@@ -5,7 +5,7 @@ services:
     image: postgres:latest
     container_name: postgres
     environment:
-      POSTGRES_DB: auth-system
+      POSTGRES_DB: auth-system-elysia
       POSTGRES_USER: myuser
       POSTGRES_PASSWORD: mypassword
     volumes:
