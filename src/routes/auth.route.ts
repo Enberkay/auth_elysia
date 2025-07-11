@@ -2,8 +2,10 @@ import { Elysia } from 'elysia'
 import { AuthController } from '../controllers/auth.controller'
 import { AuthMiddleware } from '../middlewares/auth.middleware'
 import { JWTPlugin } from '../plugins/jwt.pugin'
+import { RateLimitMiddleware } from '../middlewares/rate-limit.middleware'
 
 export const AuthRoute = new Elysia({ prefix: '/auth' })
+  .use(RateLimitMiddleware)
   .post('/login', AuthController.login)
   .post('/register', AuthController.register)
   .post('/refresh', AuthController.refresh)
