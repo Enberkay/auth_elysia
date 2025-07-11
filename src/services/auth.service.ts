@@ -2,6 +2,7 @@ import { UserModel } from '../models/user.model'
 import { LoginDto, CreateUserDto } from '../types/user'
 import { hashPassword, verifyPassword } from '../utils/password'
 import { validateEmail, validatePassword } from '../utils/validation'
+import { RefreshTokenService } from './refresh-token.service'
 
 export const AuthService = {
   login: async (data: LoginDto) => {
@@ -25,10 +26,13 @@ export const AuthService = {
       throw new Error('Invalid password')
     }
 
+    // generate refresh token
+    const refreshToken = await RefreshTokenService.generate(user.id)
     return {
       id: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      refreshToken: refreshToken.token
     }
   },
 
@@ -54,10 +58,13 @@ export const AuthService = {
       password: hashedPassword
     })
     
+    // generate refresh token
+    const refreshToken = await RefreshTokenService.generate(user.id)
     return {
       id: user.id,
       email: user.email,
-      role: user.role
+      role: user.role,
+      refreshToken: refreshToken.token
     }
   },
 

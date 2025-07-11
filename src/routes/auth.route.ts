@@ -6,6 +6,7 @@ import { JWTPlugin } from '../plugins/jwt.pugin'
 export const AuthRoute = new Elysia({ prefix: '/auth' })
   .post('/login', AuthController.login)
   .post('/register', AuthController.register)
+  .post('/refresh', AuthController.refresh)
   .use(AuthMiddleware)
   .group('/me', app => app
     .use(JWTPlugin)
