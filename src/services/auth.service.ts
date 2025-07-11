@@ -1,9 +1,17 @@
 import { UserModel } from '../models/user.model'
 import { LoginDto, CreateUserDto } from '../types/user'
 import { hashPassword, verifyPassword } from '../utils/password'
+import { validateEmail, validatePassword } from '../utils/validation'
 
 export const AuthService = {
   login: async (data: LoginDto) => {
+    // Validation
+    if (!validateEmail(data.email)) {
+      throw new Error('Invalid email format')
+    }
+    if (!validatePassword(data.password)) {
+      throw new Error('Invalid password format')
+    }
     const user = await UserModel.findByEmail(data.email)
     
     if (!user) {
@@ -25,6 +33,13 @@ export const AuthService = {
   },
 
   register: async (data: CreateUserDto) => {
+    // Validation
+    if (!validateEmail(data.email)) {
+      throw new Error('Invalid email format')
+    }
+    if (!validatePassword(data.password)) {
+      throw new Error('Password must be at least 8 characters, contain uppercase, lowercase, number, and special character')
+    }
     const existingUser = await UserModel.findByEmail(data.email)
     
     if (existingUser) {
