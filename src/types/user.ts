@@ -14,6 +14,7 @@ export interface CreateUserDto {
    */
   password: string
   role?: 'admin' | 'user'
+  isActive?: boolean
 }
 
 export interface LoginDto {

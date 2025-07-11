@@ -11,6 +11,8 @@ export const AuthRoute = new Elysia({ prefix: '/auth' })
   .post('/refresh', AuthController.refresh)
   .post('/request-reset', AuthController.requestReset)
   .post('/reset-password', AuthController.resetPassword)
+  .patch('/users/:id/activate', AuthController.activateUser)
+  .patch('/users/:id/deactivate', AuthController.deactivateUser)
   .use(AuthMiddleware)
   .group('/me', app => app
     .use(JWTPlugin)

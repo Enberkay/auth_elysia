@@ -5,6 +5,14 @@ import { UserModel } from '../models/user.model'
 import { hashPassword } from '../utils/password'
 import { AuditLogService } from '../services/audit-log.service'
 
+class AppError extends Error {
+  status: number
+  constructor(message: string, status = 400) {
+    super(message)
+    this.status = status
+  }
+}
+
 export const AuthController = {
   login: async ({ body, jwt, set, request }: any) => {
     try {
@@ -163,6 +171,34 @@ export const AuthController = {
       })
       set.status = 200
       return { message: 'Password reset successful' }
+    } catch (error: any) {
+      set.status = 400
+      return { error: error.message }
+    }
+  },
+  deactivateUser: async ({ params, set }: any) => {
+    try {
+      const { id } = params
+      if (!id) {
+        throw new AppError('Missing user id', 400)
+      }
+      await UserModel.update(Number(id), { isActive: false })
+      set.status = 200
+      return { message: 'User deactivated' }
+    } catch (error: any) {
+      set.status = 400
+      return { error: error.message }
+    }
+  },
+  activateUser: async ({ params, set }: any) => {
+    try {
+      const { id } = params
+      if (!id) {
+        throw new AppError('Missing user id', 400)
+      }
+      await UserModel.update(Number(id), { isActive: true })
+      set.status = 200
+      return { message: 'User activated' }
     } catch (error: any) {
       set.status = 400
       return { error: error.message }

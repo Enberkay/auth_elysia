@@ -18,6 +18,9 @@ export const AuthService = {
     if (!user) {
       throw new Error('User not found')
     }
+    if (user.isActive === false) {
+      throw new Error('User account is deactivated')
+    }
 
     // ใช้ bcrypt เปรียบเทียบ password
     const isPasswordValid = await verifyPassword(data.password, user.password)
