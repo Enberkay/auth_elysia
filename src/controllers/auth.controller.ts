@@ -3,11 +3,19 @@ import { RefreshTokenService } from '../services/refresh-token.service'
 import { PasswordResetService } from '../services/password-reset.service'
 import { UserModel } from '../models/user.model'
 import { hashPassword } from '../utils/password'
+import { AuditLogService } from '../services/audit-log.service'
 
 export const AuthController = {
-  login: async ({ body, jwt, set }: any) => {
+  login: async ({ body, jwt, set, request }: any) => {
     try {
       const user = await AuthService.login(body)
+      // log event
+      await AuditLogService.log({
+        userId: user.id,
+        event: 'login',
+        ip: request?.headers.get('x-forwarded-for') || '',
+        userAgent: request?.headers.get('user-agent') || ''
+      })
       
       const token = await jwt.sign({
         id: user.id,
@@ -102,7 +110,7 @@ export const AuthController = {
     }
   },
 
-  requestReset: async ({ body, set }: any) => {
+  requestReset: async ({ body, set, request }: any) => {
     try {
       const { email } = body
       if (!email) {
@@ -114,6 +122,12 @@ export const AuthController = {
         set.status = 404
         return { error: 'User not found' }
       }
+      await AuditLogService.log({
+        userId: user.id,
+        event: 'request_password_reset',
+        ip: request?.headers.get('x-forwarded-for') || '',
+        userAgent: request?.headers.get('user-agent') || ''
+      })
       const resetToken = await PasswordResetService.generate(user.id)
       // mock ส่งอีเมล (log token)
       console.log(`[MOCK EMAIL] Password reset link: http://localhost:7878/auth/reset-password?token=${resetToken.token}`)
@@ -125,7 +139,7 @@ export const AuthController = {
     }
   },
 
-  resetPassword: async ({ body, set }: any) => {
+  resetPassword: async ({ body, set, request }: any) => {
     try {
       const { token, newPassword } = body
       if (!token || !newPassword) {
@@ -141,6 +155,12 @@ export const AuthController = {
       const hashed = await hashPassword(newPassword)
       await UserModel.update(found.userId, { password: hashed })
       await PasswordResetService.markUsed(token)
+      await AuditLogService.log({
+        userId: found.userId,
+        event: 'reset_password',
+        ip: request?.headers.get('x-forwarded-for') || '',
+        userAgent: request?.headers.get('user-agent') || ''
+      })
       set.status = 200
       return { message: 'Password reset successful' }
     } catch (error: any) {
