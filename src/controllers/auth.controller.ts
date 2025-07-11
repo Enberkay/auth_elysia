@@ -1,5 +1,8 @@
 import { AuthService } from '../services/auth.service'
 import { RefreshTokenService } from '../services/refresh-token.service'
+import { PasswordResetService } from '../services/password-reset.service'
+import { UserModel } from '../models/user.model'
+import { hashPassword } from '../utils/password'
 
 export const AuthController = {
   login: async ({ body, jwt, set }: any) => {
@@ -95,6 +98,53 @@ export const AuthController = {
       }
     } catch (error: any) {
       set.status = 404
+      return { error: error.message }
+    }
+  },
+
+  requestReset: async ({ body, set }: any) => {
+    try {
+      const { email } = body
+      if (!email) {
+        set.status = 400
+        return { error: 'Missing email' }
+      }
+      const user = await UserModel.findByEmail(email)
+      if (!user) {
+        set.status = 404
+        return { error: 'User not found' }
+      }
+      const resetToken = await PasswordResetService.generate(user.id)
+      // mock ส่งอีเมล (log token)
+      console.log(`[MOCK EMAIL] Password reset link: http://localhost:7878/auth/reset-password?token=${resetToken.token}`)
+      set.status = 200
+      return { message: 'Password reset link sent (mock)', token: resetToken.token }
+    } catch (error: any) {
+      set.status = 400
+      return { error: error.message }
+    }
+  },
+
+  resetPassword: async ({ body, set }: any) => {
+    try {
+      const { token, newPassword } = body
+      if (!token || !newPassword) {
+        set.status = 400
+        return { error: 'Missing token or new password' }
+      }
+      const found = await PasswordResetService.validate(token)
+      if (!found) {
+        set.status = 400
+        return { error: 'Invalid or expired token' }
+      }
+      // hash new password
+      const hashed = await hashPassword(newPassword)
+      await UserModel.update(found.userId, { password: hashed })
+      await PasswordResetService.markUsed(token)
+      set.status = 200
+      return { message: 'Password reset successful' }
+    } catch (error: any) {
+      set.status = 400
       return { error: error.message }
     }
   }
