@@ -1,8 +1,16 @@
 import { Elysia } from 'elysia'
 import { JWTUser } from '../types/user'
 import { db } from '../lib/db'
+import { JWTPlugin } from '../plugins/jwt.plugin'
+import type { JwtPayload } from "../app";
+
+type JwtHelper = {
+  sign: (payload: JwtPayload) => Promise<string>;
+  verify: (token: string) => Promise<JwtPayload | null>;
+};
 
 export const AuthMiddleware = new Elysia()
+  .use(JWTPlugin)
   .derive(async ({ jwt, request, set }) => {
     const auth = request.headers.get('authorization')
 
