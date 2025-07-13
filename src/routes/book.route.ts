@@ -14,12 +14,11 @@ export const BookRoute = new Elysia({ prefix: '/books' })
   // Admin only - ต้องเป็น admin เท่านั้น
   .group('/admin', app => app
     .use(AuthMiddleware)
-    .post('/', BookController.create)
-      .onBeforeHandle(requireRole(['admin']))
-    
-    .put('/:id', BookController.update)
-      .onBeforeHandle(requireRole(['admin']))
-    
-    .delete('/:id', BookController.remove)
-      .onBeforeHandle(requireRole(['admin']))
+    .guard({
+      beforeHandle: requireRole(['admin'])
+    }, app => app
+      .post('/', BookController.create)
+      .put('/:id', BookController.update)
+      .delete('/:id', BookController.remove)
+    )
   )
