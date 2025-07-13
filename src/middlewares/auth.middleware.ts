@@ -2,12 +2,6 @@ import { Elysia } from 'elysia'
 import { JWTUser } from '../types/user'
 import { db } from '../lib/db'
 import { JWTPlugin } from '../plugins/jwt.plugin'
-import type { JwtPayload } from "../app";
-
-type JwtHelper = {
-  sign: (payload: JwtPayload) => Promise<string>;
-  verify: (token: string) => Promise<JwtPayload | null>;
-};
 
 export const AuthMiddleware = new Elysia()
   .use(JWTPlugin)
@@ -28,7 +22,7 @@ export const AuthMiddleware = new Elysia()
     }
 
     // ดึง user จาก DB เพื่อตรวจสอบ isActive
-    const userDb = await db.user.findUnique({ where: { id: payload.id } })
+    const userDb = await db.user.findUnique({ where: { id: Number(payload.id) } })
     if (!userDb || userDb.isActive === false) {
       set.status = 403
       throw new Error('User account is deactivated')
