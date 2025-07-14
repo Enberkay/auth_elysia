@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { JWTPlugin } from './plugins/jwt.pugin'
+import { JWTPlugin } from './plugins/jwt.plugin'
 import { LoggerPlugin } from './plugins/logger.plugin'
 import { AuthRoute } from './routes/auth.route'
 import { BookRoute } from './routes/book.route'
