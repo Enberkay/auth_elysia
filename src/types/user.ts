@@ -4,6 +4,17 @@ export interface JWTUser {
   role: 'admin' | 'user'
 }
 
+export interface User {
+  id: number
+  email: string
+  password: string
+  role: 'admin' | 'user'
+  isActive: boolean
+  isEmailVerified: boolean
+  emailVerificationToken?: string | null
+  emailVerifiedAt?: Date | null
+}
+
 export interface CreateUserDto {
   /**
    * Email ต้องเป็นรูปแบบอีเมลที่ถูกต้อง (RFC 5322)
@@ -15,6 +26,9 @@ export interface CreateUserDto {
   password: string
   role?: 'admin' | 'user'
   isActive?: boolean
+  isEmailVerified?: boolean
+  emailVerificationToken?: string | null
+  emailVerifiedAt?: Date | null
 }
 
 export interface LoginDto {
