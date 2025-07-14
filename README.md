@@ -19,7 +19,7 @@ src/
 │   ├── user.model.ts         # User database operations
 │   └── book.model.ts         # Book database operations
 ├── plugins/
-│   ├── jwt.pugin.ts          # JWT plugin
+│   ├── jwt.plugin.ts         # JWT plugin
 │   └── logger.plugin.ts      # Request logging (morgan-like)
 ├── routes/
 │   ├── auth.route.ts         # Auth endpoints
